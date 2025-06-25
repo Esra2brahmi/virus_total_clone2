@@ -1,0 +1,125 @@
+<% if @error %>
+  <div class="max-w-xl mx-auto mt-10">
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded mb-6">
+      <p class="font-semibold">An error occurred</p>
+      <p><%= @error %></p>
+    </div>
+  </div>
+<% elsif @results.nil? || (@scan_type == 'url' && @results["status"] != "completed") %>
+  <meta http-equiv="refresh" content="5">
+  <div class="max-w-xl mx-auto mt-10">
+    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded mb-6">
+      <p class="font-semibold">Analysis in progress... this page will refresh automatically 🔄</p>
+      <p class="text-sm">Your file/URL is being analyzed by VirusTotal. This can take a few moments.</p>
+    </div>
+  </div>
+<% else %>
+  <div class="max-w-2xl mx-auto mt-10">
+    <h1 class="text-3xl font-bold mb-6 text-center">Scan Results</h1>
+
+    <!-- Summary Card -->
+    <div class="bg-white shadow rounded-lg p-6 mb-6 border border-gray-200">
+      <div class="space-y-2">
+        <div>
+          <span class="font-semibold text-gray-700">Status:</span>
+          <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-bold ml-1">✅ Completed</span>
+        </div>
+        <% if @scan_type == 'file' %>
+          <div><span class="font-semibold text-gray-700">File Name:</span> <%= @results["meaningful_name"] %></div>
+          <div><span class="font-semibold text-gray-700">File Size:</span> <%= number_to_human_size(@results["size"]) %></div>
+          <div><span class="font-semibold text-gray-700">MD5:</span> <code class="text-sm bg-gray-100 p-1 rounded"><%= @results["md5"] %></code></div>
+          <div><span class="font-semibold text-gray-700">SHA256:</span> <code class="text-sm bg-gray-100 p-1 rounded"><%= @results["sha256"] %></code></div>
+        <% else %>
+          <% if @results["date"] %>
+            <div><span class="font-semibold text-gray-700">Scan Date:</span> <%= Time.at(@results["date"]).strftime("%Y-%m-%d %H:%M:%S") %></div>
+          <% end %>
+        <% end %>
+        <div><span class="font-semibold text-gray-700">Analysis ID:</span> <%= @analysis_id %></div>
+        <div class="pt-2">
+          <span class="font-semibold text-gray-700">Community Votes:</span> 
+          <span class="text-green-600 font-medium">Harmless: <%= @results.dig("total_votes", "harmless") || @results.dig("last_analysis_results", "total_votes", "harmless") || 0 %></span>,
+          <span class="text-red-600 font-medium">Malicious: <%= @results.dig("total_votes", "malicious") || @results.dig("last_analysis_results", "total_votes", "malicious") || 0 %></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Card -->
+    <% stats = @scan_type == 'file' ? @results["last_analysis_stats"] : @results["stats"] %>
+    <div class="bg-gray-50 shadow rounded-lg p-4 mb-6 border border-gray-100">
+      <h2 class="font-semibold mb-2 text-lg">Analysis Stats</h2>
+      <div class="space-y-2">
+        <% stats.each do |type, count| %>
+          <% color = case type
+            when "malicious" then "bg-red-100 text-red-700"
+            when "suspicious" then "bg-yellow-100 text-yellow-700"
+            when "harmless" then "bg-green-100 text-green-700"
+            when "undetected" then "bg-gray-200 text-gray-700"
+            else "bg-gray-100 text-gray-600"
+          end %>
+          <div class="px-3 py-1 rounded font-medium <%= color %>">
+            <%= type.capitalize %>: <%= count %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Engine Results (Full-width container) -->
+  <% if @results && !@error %>
+    <% analysis_results = @scan_type == 'file' ? @results["last_analysis_results"] : @results["results"] %>
+    <% if analysis_results %>
+      <div class="bg-white py-6">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 class="font-semibold text-lg text-gray-900">All Engine Results</h2>
+          <div class="mt-4 overflow-x-auto shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+            <table class="min-w-full divide-y divide-gray-300">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Engine</th>
+                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Category</th>
+                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Result</th>
+                  <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Method</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 bg-white">
+                <% analysis_results.each do |engine, data| %>
+                  <% cat_color = case data["category"]
+                    when "malicious" then "text-red-700 font-bold"
+                    when "suspicious" then "text-yellow-700 font-bold"
+                    when "harmless" then "text-green-700"
+                    else "text-gray-700"
+                  end %>
+                  <tr>
+                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"><%= engine %></td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm <%= cat_color %>"><%= data["category"].capitalize %></td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= data["result"] %></td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= data["method"] %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="max-w-2xl mx-auto mt-6">
+      <% stats = @scan_type == 'file' ? @results["last_analysis_stats"] : @results["stats"] %>
+      <% if stats && stats["malicious"] == 0 && stats["suspicious"] == 0 %>
+        <div class="bg-green-50 border-l-4 border-green-400 text-green-700 p-4 rounded">
+          <p class="font-medium">✅ This <%= @scan_type %> appears to be safe based on all available scans.</p>
+        </div>
+      <% end %>
+
+      <!-- Collapsible Raw JSON -->
+      <details class="mt-6">
+        <summary class="cursor-pointer text-blue-600 hover:underline font-semibold">Show raw JSON response</summary>
+        <pre class="bg-gray-100 border border-gray-200 p-4 rounded text-xs overflow-x-auto mt-2"><%= JSON.pretty_generate(@results) %></pre>
+      </details>
+    </div>
+  <% end %>
+
+  <div class="mt-8 text-center">
+    <%= link_to 'Scan another URL or File', root_path, class: "inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-semibold shadow" %>
+  </div>
+<% end %>

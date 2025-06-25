@@ -1,0 +1,17 @@
+<h1 class="text-2xl font-bold mb-4">Scan a URL or File with VirusTotal</h1>
+
+<%= form_with url: scans_path, method: :post, multipart: true, local: true, html: { class: "space-y-4" } do |f| %>
+  <div>
+    <%= f.label :url, "Enter a URL to scan", class: "block mb-1 font-medium" %>
+    <%= f.text_field :url, class: "border p-2 w-full rounded" %>
+  </div>
+
+  <div class="text-center font-semibold text-gray-500">OR</div>
+
+  <div>
+    <%= f.label :file, "Upload a file to scan", class: "block mb-1 font-medium" %>
+    <%= f.file_field :file, class: "border p-2 w-full rounded" %>
+  </div>
+
+  <%= f.submit "Scan", class: "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full" %>
+<% end %>
