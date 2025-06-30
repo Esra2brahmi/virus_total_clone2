@@ -1,0 +1,7 @@
+<h2 class="text-xl font-semibold mb-4">Community Feedback</h2>
+<% votes = @result.dig("attributes", "total_votes") || {} %>
+<ul class="space-y-2">
+  <li><strong>Harmless Votes:</strong> <%= votes["harmless"] || 0 %></li>
+  <li><strong>Malicious Votes:</strong> <%= votes["malicious"] || 0 %></li>
+</ul>
+<p class="mt-2 text-gray-400">More community data (like comments) may be available via extended API access.</p>

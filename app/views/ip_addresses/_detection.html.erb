@@ -1,0 +1,51 @@
+<h2 class="text-xl font-semibold mb-4">Security Vendors' Analysis</h2>
+
+<table class="w-full text-sm table-auto">
+  <thead>
+    <tr class="text-left text-gray-400 border-b border-[#394568]">
+      <th class="py-2">Engine</th>
+      <th class="py-2">Category</th>
+      <th class="py-2">Method</th>
+      <th class="py-2">Result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @result.dig("attributes", "last_analysis_results")&.each do |engine, data| %>
+      <% category = data["category"] %>
+      <% result = data["result"] || "N/A" %>
+
+      <% icon_color, icon_svg, text_color, label = begin
+        case category
+        when "malicious"
+          ["text-red-500", "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z", "text-red-500", "Malicious"]
+        when "suspicious", "spam"
+          ["text-yellow-500", "M12 9v2m0 4h.01M12 5a7 7 0 100 14 7 7 0 000-14z", "text-yellow-500", category.capitalize]
+        when "harmless", "undetected"
+          ["text-green-500", "M5 13l4 4L19 7", "text-green-500", "Clean"]
+        else
+          ["text-gray-400", nil, "text-gray-400", category.try(:capitalize) || "Unknown"]
+        end
+      end %>
+
+      <tr class="border-b border-[#2e2e3e]">
+        <td class="py-2 text-gray-300"><%= data["engine_name"] %></td>
+
+        <td class="py-2 capitalize">
+          <span class="flex items-center gap-2 <%= text_color %>">
+            <% if icon_svg %>
+              <div class="w-5 h-5 flex items-center justify-center border rounded-full border-current">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="<%= icon_svg %>" />
+                </svg>
+              </div>
+            <% end %>
+            <span class="text-sm font-normal bg-white/5 px-2 py-0.5 rounded"><%= label %></span>
+          </span>
+        </td>
+
+        <td class="py-2 text-gray-400"><%= data["method"] %></td>
+        <td class="py-2 text-gray-300"><%= result %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

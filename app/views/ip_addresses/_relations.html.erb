@@ -1,0 +1,57 @@
+<h2 class="text-xl font-semibold mb-6 text-white border-b border-[#394568] pb-2">Communicating Files</h2>
+
+<% if @files.present? %>
+  <div class="overflow-x-auto">
+    <p class="text-sm text-gray-400 mb-2">Page <%= @page %> of <%= @total_pages %></p>
+
+    <table class="w-full text-sm text-left text-gray-300">
+      <thead class="bg-[#2a2b3c] text-gray-400 uppercase text-xs tracking-wider">
+        <tr>
+          <th class="px-4 py-3">📅 Scanned</th>
+          <th class="px-4 py-3">🛡️ Detections</th>
+          <th class="px-4 py-3">📂 Type</th>
+          <th class="px-4 py-3">📄 Name</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[#394568]">
+        <% @files.each do |file| %>
+          <% attr = file["attributes"] %>
+          <% total = attr["last_analysis_stats"]&.values&.sum || 1 %>
+          <% malicious = attr["last_analysis_stats"]["malicious"] || 0 %>
+          <tr class="hover:bg-[#2f3147] transition">
+            <td class="px-4 py-3">
+              <%= Time.at(attr["last_analysis_date"]).strftime("%Y-%m-%d") rescue "N/A" %>
+            </td>
+            <td class="px-4 py-3 font-semibold <%= malicious > 0 ? 'text-red-400' : 'text-green-400' %>">
+              <%= "#{malicious} / #{total}" %>
+            </td>
+            <td class="px-4 py-3">
+              <%= attr["type_description"] || "Unknown" %>
+            </td>
+            <td class="px-4 py-3">
+              <% filename = attr["meaningful_name"] || "N/A" %>
+              <% file_link = "https://www.virustotal.com/gui/file/#{file['id']}" %>
+              <a href="<%= file_link %>" class="text-blue-400 hover:underline" target="_blank" rel="noopener">
+                <%= filename %>
+              </a>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <p class="text-gray-400 italic">No communicating files found for this IP.</p>
+<% end %>
+<div class="mt-4 flex justify-center gap-2 text-sm">
+  <% if @page > 1 %>
+    <%= link_to "⬅ Prev", show_ip_address_path(query: @result["id"], page: @page - 1), class: "px-3 py-1 bg-[#394568] text-white rounded" %>
+
+  <% end %>
+
+  <% if @page < @total_pages %>
+    <%= link_to "Next ➡", show_ip_address_path(query: @result["id"], page: @page + 1), class: "px-3 py-1 bg-[#394568] text-white rounded" %>
+
+  <% end %>
+</div>
+

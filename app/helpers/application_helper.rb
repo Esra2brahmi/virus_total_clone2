@@ -1,2 +1,4 @@
 module ApplicationHelper
-end
+    include Heroicon::Engine.helpers
+  end
+  

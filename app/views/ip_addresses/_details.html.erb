@@ -1,0 +1,54 @@
+<h2 class="text-xl font-semibold mb-4">Basic Properties</h2>
+<ul class="space-y-2">
+  <li><strong>Network:</strong> <%= @result.dig("attributes", "network") || "N/A" %></li>
+  <li><strong>ASN:</strong> <%= @result.dig("attributes", "asn") || "N/A" %></li>
+  <li><strong>AS Owner:</strong> <%= @result.dig("attributes", "as_owner") || "N/A" %></li>
+  <li><strong>Country:</strong> <%= @result.dig("attributes", "country") || "N/A" %></li>
+  <li><strong>Continent:</strong> <%= @result.dig("attributes", "continent") || "N/A" %></li>
+  <li><strong>Registry:</strong> <%= @result.dig("attributes", "regional_internet_registry") || "N/A" %></li>
+  <li><strong>JARM Fingerprint:</strong> <%= @result.dig("attributes", "last_https_certificate", "extensions", "jarm") || "N/A" %></li>
+</ul>
+
+<hr class="my-6 border-[#394568]" />
+
+<h2 class="text-xl font-semibold mb-4">Last HTTPS Certificate</h2>
+<% cert = @result.dig("attributes", "last_https_certificate") || {} %>
+<ul class="space-y-2 text-sm">
+  <li><strong>Version:</strong> <%= cert["version"] || "N/A" %></li>
+  <li><strong>Serial Number:</strong> <%= cert["serial_number"] || "N/A" %></li>
+  <li><strong>Thumbprint:</strong> <%= cert["thumbprint"] || "N/A" %></li>
+  <li><strong>Signature Algorithm:</strong> <%= cert["signature_algorithm"] || "N/A" %></li>
+  <li><strong>Issuer:</strong> <%= cert["issuer"] || "N/A" %></li>
+  <li><strong>Validity:</strong>
+    <ul class="ml-4">
+      <li>Not Before: <%= cert.dig("validity", "not_before") || "N/A" %></li>
+      <li>Not After: <%= cert.dig("validity", "not_after") || "N/A" %></li>
+    </ul>
+  </li>
+  <li><strong>Subject:</strong> <%= cert["subject"] || "N/A" %></li>
+  <li><strong>Public Key Algorithm:</strong> <%= cert.dig("public_key", "algorithm") || "N/A" %></li>
+  <li><strong>Public Key Bits:</strong> <%= cert.dig("public_key", "bits") || "N/A" %></li>
+</ul>
+
+<hr class="my-6 border-[#394568]" />
+
+<h2 class="text-xl font-semibold mb-4">Registration Data (RDAP)</h2>
+<ul class="space-y-2 text-sm">
+  <li><strong>Network:</strong> <%= @result.dig("attributes", "network") || "N/A" %></li>
+  <li><strong>Registry:</strong> <%= @result.dig("attributes", "regional_internet_registry") || "N/A" %></li>
+  <li><strong>ASN:</strong> <%= @result.dig("attributes", "asn") || "N/A" %></li>
+  <li><strong>AS Owner:</strong> <%= @result.dig("attributes", "as_owner") || "N/A" %></li>
+  <li><strong>Country:</strong> <%= @result.dig("attributes", "country") || "N/A" %></li>
+  <li><strong>Continent:</strong> <%= @result.dig("attributes", "continent") || "N/A" %></li>
+</ul>
+
+<hr class="my-6 border-[#394568]" />
+
+<h2 class="text-xl font-semibold mb-4">Whois Lookup</h2>
+<% whois_text = @result.dig("attributes", "whois") %>
+<% if whois_text.present? %>
+  <pre class="whitespace-pre-wrap text-gray-300 bg-[#2a2a3c] p-4 rounded-md text-sm"><%= whois_text %></pre>
+<% else %>
+  <p class="text-gray-400">No WHOIS data available for this IP.</p>
+<% end %>
+

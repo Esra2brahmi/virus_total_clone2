@@ -1,15 +1,35 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>VirusScannerV2</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
+<head>
+  <title>VirusTotal Clone</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
 
-    <%= stylesheet_link_tag "application" %>
-  </head>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-  <body>
-    <%= yield %>
-  </body>
+  <style>
+    body {
+      background-color: #171624;
+    }
+  </style>
+</head>
+
+<body class="text-white font-sans">
+  <%= yield %>
+</body>
+<% if flash[:notice] %>
+  <div id="toast" class="fixed top-5 right-5 bg-green-600 text-white px-4 py-2 rounded shadow-lg transition-opacity duration-300 z-50">
+    <%= flash[:notice] %>
+  </div>
+
+  <script>
+    setTimeout(() => {
+      const toast = document.getElementById("toast");
+      if (toast) toast.style.opacity = "0";
+    }, 3000); // Disappear after 3 seconds
+  </script>
+<% end %>
+
 </html>

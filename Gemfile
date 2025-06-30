@@ -5,9 +5,13 @@ ruby "3.2.4"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 7.0.8"
+gem 'mongoid', '~> 7.5'
+gem "httparty"
 
 gem "virustotalx"  # or the gem you use for VirusTotal API
 gem "dotenv-rails"
+gem "heroicon"
+
 
 
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
