@@ -10,7 +10,14 @@ class IpAddressesController < ApplicationController
   if response.success?
     @result = response.parsed_response["data"]
     all_files = service.get_all_ip_relationship(ip, "communicating_files")
-    Rails.logger.info "Fetched files: #{all_files.length}"
+    @resolutions = service.get_all_ip_relationship(ip, "resolutions")
+    @referrer_files = service.get_all_ip_relationship(ip, "referrer_files")
+    @whois_records = service.get_all_ip_relationship(ip, "historical_whois")
+    @ssl_certs = service.get_all_ip_relationship(ip, "historical_ssl_certificates")
+    @graph = service.get_all_ip_relationship(ip, "graphs")&.first
+
+
+
     @page = (params[:page] || 1).to_i
     per_page = 10
     @files = all_files.slice((@page - 1) * per_page, per_page) || []
@@ -38,6 +45,15 @@ end
   if updated_response.success?
     @result = updated_response.parsed_response["data"]
     all_files = service.get_all_ip_relationship(ip, "communicating_files")
+    @resolutions = service.get_all_ip_relationship(ip, "resolutions")
+    @referrer_files = service.get_all_ip_relationship(ip, "referrer_files")
+    @whois_records = service.get_all_ip_relationship(ip, "historical_whois")
+    @ssl_certs = service.get_all_ip_relationship(ip, "historical_ssl_certificates")
+    @graph = service.get_all_ip_relationship(ip, "graphs")&.first
+
+
+
+
     
     @page = (params[:page] || 1).to_i
     per_page = 10
@@ -57,6 +73,14 @@ end
   service = VirusTotal::IpService.new
 
   all_files = service.get_all_ip_relationship(ip, "communicating_files")
+  @referrer_files = service.get_all_ip_relationship(ip, "referrer_files")
+  @resolutions = service.get_all_ip_relationship(ip, "resolutions")
+  @whois_records = service.get_all_ip_relationship(ip, "historical_whois")
+  @ssl_certs = service.get_all_ip_relationship(ip, "historical_ssl_certificates")
+  @graph = service.get_all_ip_relationship(ip, "graphs")&.first
+
+
+
   
   @page = (params[:page] || 1).to_i
   per_page = 10
@@ -65,7 +89,6 @@ end
 
   render 'ip_addresses/relations'
 rescue => e
-  Rails.logger.error("Error loading communicating files: #{e.message}")
   flash[:error] = "Failed to load communicating files."
   redirect_to root_path
 end

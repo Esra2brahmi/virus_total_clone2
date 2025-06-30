@@ -55,3 +55,317 @@
   <% end %>
 </div>
 
+<h2 class="text-xl font-semibold mt-10 mb-4 text-white border-b border-[#394568] pb-2">Passive DNS Replication</h2>
+
+<% if @resolutions.present? %>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm text-left text-gray-300">
+      <thead class="bg-[#2a2b3c] text-gray-400 uppercase text-xs tracking-wider">
+        <tr>
+          <th class="px-4 py-3">📅 Date Resolved</th>
+          <th class="px-4 py-3">🛡️ Detections</th>
+          <th class="px-4 py-3">🌐 Resolver</th>
+          <th class="px-4 py-3">🔗 Domain</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[#394568]">
+        <% @resolutions.each do |resolution| %>
+          <% attr = resolution["attributes"] %>
+          <% stats = attr["host_name_last_analysis_stats"] || {} %>
+          <% total = stats.values.sum rescue 1 %>
+          <% malicious = stats["malicious"] || 0 %>
+
+          <tr class="hover:bg-[#2f3147] transition">
+            <td class="px-4 py-3"><%= Time.at(attr["date"]).strftime("%Y-%m-%d") rescue "N/A" %></td>
+            <td class="px-4 py-3 font-semibold <%= malicious > 0 ? 'text-red-400' : 'text-green-400' %>">
+              <%= "#{malicious} / #{total}" %>
+            </td>
+            <td class="px-4 py-3"><%= attr["resolver"] || "N/A" %></td>
+            <td class="px-4 py-3">
+              <% domain = attr["host_name"] || "N/A" %>
+              <% domain_link = "https://www.virustotal.com/gui/domain/#{domain}" %>
+              <a href="<%= domain_link %>" class="text-blue-400 hover:underline" target="_blank" rel="noopener">
+                <%= domain %>
+              </a>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <p class="text-gray-400 italic">No DNS resolutions found for this IP.</p>
+<% end %>
+
+<h2 class="text-xl font-semibold mt-10 mb-4 text-white border-b border-[#394568] pb-2">Files Referring</h2>
+
+<% if @referrer_files.present? %>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm text-left text-gray-300">
+      <thead class="bg-[#2a2b3c] text-gray-400 uppercase text-xs tracking-wider">
+        <tr>
+          <th class="px-4 py-3">📅 Scanned</th>
+          <th class="px-4 py-3">🛡️ Detections</th>
+          <th class="px-4 py-3">📂 Type</th>
+          <th class="px-4 py-3">🔗 Name</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[#394568]">
+        <% @referrer_files.each do |file| %>
+          <% attr = file["attributes"] %>
+          <% total = attr["last_analysis_stats"]&.values&.sum || 1 %>
+          <% malicious = attr["last_analysis_stats"]["malicious"] || 0 %>
+          <% file_id = file["id"] %>
+          <% file_name = attr["meaningful_name"] || file_id %>
+          <% file_link = "https://www.virustotal.com/gui/file/#{file_id}" %>
+
+          <tr class="hover:bg-[#2f3147] transition">
+            <td class="px-4 py-3">
+              <%= Time.at(attr["last_analysis_date"]).strftime("%Y-%m-%d") rescue "N/A" %>
+            </td>
+            <td class="px-4 py-3 font-semibold <%= malicious > 0 ? 'text-red-400' : 'text-green-400' %>">
+              <%= "#{malicious} / #{total}" %>
+            </td>
+            <td class="px-4 py-3">
+              <%= attr["type_description"] || "Unknown" %>
+            </td>
+            <td class="px-4 py-3">
+              <a href="<%= file_link %>" class="text-blue-400 hover:underline" target="_blank" rel="noopener">
+                <%= file_name %>
+              </a>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <p class="text-gray-400 italic">No referring files found for this IP.</p>
+<% end %>
+
+<h2 class="text-xl font-semibold mt-10 mb-4 text-white border-b border-[#394568] pb-2">
+  Historical Whois Lookups
+</h2>
+
+<% if @whois_records.present? %>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm text-left text-gray-300">
+      <thead class="bg-[#2a2b3c] text-gray-400 uppercase text-xs tracking-wider">
+        <tr>
+          <th class="px-4 py-3"></th>
+          <th class="px-4 py-3">📅 Last Updated</th>
+          <th class="px-4 py-3">🏢 Organization</th>
+          <th class="px-4 py-3">📧 Email</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[#394568]">
+        <% @whois_records.each_with_index do |record, index| %>
+          <% attr = record["attributes"] %>
+          <% whois_map = attr["whois_map"] || {} %>
+          <% org = whois_map["OrgName"] || whois_map["org-name"] || whois_map["organization"] || "N/A" %>
+          <% email = whois_map["email"] || whois_map["OrgAbuseEmail"] || whois_map["OrgTechEmail"] || "N/A" %>
+          <% row_id = "whois-extra-#{index}" %>
+
+          <!-- Main row -->
+          <tr class="hover:bg-[#2f3147] transition">
+            <td class="px-4 py-3">
+              <button onclick="toggleRow('<%= row_id %>')" class="text-white">➕</button>
+            </td>
+            <td class="px-4 py-3"><%= Time.at(attr["last_updated"]).strftime("%Y-%m-%d") rescue "N/A" %></td>
+            <td class="px-4 py-3"><%= org %></td>
+            <td class="px-4 py-3 text-blue-400">
+              <% if email != "N/A" %>
+                <a href="mailto:<%= email %>" class="hover:underline"><%= email %></a>
+              <% else %>
+                N/A
+              <% end %>
+            </td>
+          </tr>
+
+          <!-- Expandable row -->
+          <tr id="<%= row_id %>" class="hidden bg-[#23253b]">
+            <td colspan="4" class="px-4 py-3">
+              <div class="text-sm grid grid-cols-2 md:grid-cols-3 gap-2">
+                <% whois_map.each do |key, value| %>
+                  <div><span class="text-gray-400"><%= key %>:</span> <%= value %></div>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- JS toggle -->
+  <script>
+    function toggleRow(id) {
+      const row = document.getElementById(id);
+      if (row) {
+        row.classList.toggle("hidden");
+      }
+    }
+  </script>
+<% else %>
+  <p class="text-gray-400 italic">No historical WHOIS data found for this IP.</p>
+<% end %>
+
+
+<h2 class="text-xl font-semibold mt-10 mb-4 text-white border-b border-[#394568] pb-2">
+  Historical SSL Certificates
+</h2>
+
+<% if @ssl_certs.present? %>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm text-left text-gray-300">
+      <thead class="bg-[#2a2b3c] text-gray-400 uppercase text-xs tracking-wider">
+        <tr>
+          <th class="px-4 py-3"></th>
+          <th class="px-4 py-3">📅 First Seen</th>
+          <th class="px-4 py-3">🔒 Subject</th>
+          <th class="px-4 py-3">🧬 Thumbprint</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[#394568]">
+        <% @ssl_certs.each_with_index do |cert, index| %>
+          <% attr = cert["attributes"] %>
+          <% subject = attr["subject"]["CN"] || "N/A" %>
+          <% thumbprint = attr["thumbprint"] || "N/A" %>
+          <% first_seen = Time.at(attr["first_seen_date"]).strftime("%Y-%m-%d") rescue "N/A" %>
+          <% row_id = "ssl-extra-#{index}" %>
+
+          <!-- Main row -->
+          <tr class="hover:bg-[#2f3147] transition">
+            <td class="px-4 py-3">
+              <button onclick="toggleRow('<%= row_id %>')" class="text-white">➕</button>
+            </td>
+            <td class="px-4 py-3"><%= first_seen %></td>
+            <td class="px-4 py-3"><%= subject %></td>
+            <td class="px-4 py-3">
+              <a href="https://www.virustotal.com/gui/certificate/<%= cert['id'] %>" class="text-blue-400 hover:underline" target="_blank" rel="noopener">
+                <%= thumbprint %>
+              </a>
+            </td>
+
+          </tr>
+
+          <!-- Collapsible row -->
+          <tr id="<%= row_id %>" class="hidden bg-[#23253b]">
+            <td colspan="4" class="px-4 py-3">
+              <div class="text-sm grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div><span class="text-gray-400">Version:</span> <%= attr["version"] || "N/A" %></div>
+                <div><span class="text-gray-400">Serial Number:</span> <%= attr["serial_number"] %></div>
+                <div><span class="text-gray-400">Thumbprint:</span> <%= attr["thumbprint"] %></div>
+                <div><span class="text-gray-400">Signature Algorithm:</span> <%= attr["signature_algorithm"] %></div>
+                <div><span class="text-gray-400">Issuer:</span> <%= attr["issuer"].values.compact.join(", ") %></div>
+                <div><span class="text-gray-400">Not Before:</span> <%= attr.dig("validity", "not_before") || "N/A" %></div>
+                <div><span class="text-gray-400">Not After:</span> <%= attr.dig("validity", "not_after") || "N/A" %></div>
+                <div><span class="text-gray-400">Public Key Algorithm:</span> <%= attr.dig("public_key", "algorithm") || "N/A" %></div>
+                <% if attr.dig("public_key", "rsa", "key_size") %>
+                  <div><span class="text-gray-400">RSA Key Size:</span> <%= attr["public_key"]["rsa"]["key_size"] %> bit</div>
+                <% end %>
+                <% if attr.dig("extensions", "subject_alternative_name") %>
+                  <div class="col-span-full">
+                    <span class="text-gray-400">Subject Alt Names:</span>
+                    <ul class="list-disc list-inside ml-4 text-gray-200">
+                      <% attr["extensions"]["subject_alternative_name"].each do |san| %>
+                        <li><%= san %></li>
+                      <% end %>
+                    </ul>
+                  </div>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- JS toggle -->
+  <script>
+    function toggleRow(id) {
+      const row = document.getElementById(id);
+      if (row) {
+        row.classList.toggle("hidden");
+      }
+    }
+  </script>
+<% else %>
+  <p class="text-gray-400 italic">No SSL certificate history found for this IP.</p>
+<% end %>
+
+
+<h2 class="text-xl font-semibold mt-10 mb-4 text-white border-b border-[#394568] pb-2">
+  Graph Summary (Interactive)
+</h2>
+
+<% if @graph.present? %>
+  <div id="cy" style="height: 500px; width: 100%;" class="bg-[#1e1f2c] rounded-lg shadow-lg"></div>
+
+  <script src="https://unpkg.com/cytoscape@3.24.0/dist/cytoscape.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const cy = cytoscape({
+        container: document.getElementById("cy"),
+        style: [
+          {
+            selector: "node",
+            style: {
+              "background-color": "#4fc3f7",
+              "label": "data(label)",
+              "color": "#fff",
+              "font-size": 10,
+              "text-valign": "center",
+              "text-halign": "center"
+            }
+          },
+          {
+            selector: "edge",
+            style: {
+              "width": 2,
+              "line-color": "#888",
+              "target-arrow-color": "#888",
+              "target-arrow-shape": "triangle"
+            }
+          }
+        ],
+        elements: {
+          nodes: [
+            <% @graph["attributes"]["nodes"].each do |node| %>
+              {
+                data: { id: "<%= node["entity_id"] %>", label: "<%= node["text"] || node["type"] %>" }
+              },
+            <% end %>
+          ],
+          edges: [
+            <% @graph["attributes"]["links"].each do |link| %>
+              {
+                data: {
+                  source: "<%= link["source"] %>",
+                  target: "<%= link["target"] %>",
+                  label: "<%= link["connection_type"] %>"
+                }
+              },
+            <% end %>
+          ]
+        },
+        layout: {
+          name: "cose",
+          animate: true
+        }
+      });
+
+      cy.on('tap', 'node', function(evt){
+        const node = evt.target;
+        alert('You clicked on node: ' + node.data('label'));
+      });
+    });
+  </script>
+<% else %>
+  <p class="text-gray-400 italic">No graph data found for this IP.</p>
+<% end %>
+
+
+
+

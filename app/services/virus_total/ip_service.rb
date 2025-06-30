@@ -28,10 +28,6 @@ module VirusTotal
 
             body = response.parsed_response
 
-            Rails.logger.info "API URL: #{url}"
-            Rails.logger.info "Returned items: #{body['data']&.size}"
-            Rails.logger.info "Next page link: #{body.dig('links', 'next')}"
-            
             results.concat(body["data"]) if body["data"]
 
             next_link = body.dig("links", "next")
