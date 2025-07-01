@@ -1,54 +1,50 @@
-<h2 class="text-xl font-semibold mb-4">Basic Properties</h2>
-<ul class="space-y-2">
-  <li><strong>Network:</strong> <%= @result.dig("attributes", "network") || "N/A" %></li>
-  <li><strong>ASN:</strong> <%= @result.dig("attributes", "asn") || "N/A" %></li>
-  <li><strong>AS Owner:</strong> <%= @result.dig("attributes", "as_owner") || "N/A" %></li>
-  <li><strong>Country:</strong> <%= @result.dig("attributes", "country") || "N/A" %></li>
-  <li><strong>Continent:</strong> <%= @result.dig("attributes", "continent") || "N/A" %></li>
-  <li><strong>Registry:</strong> <%= @result.dig("attributes", "regional_internet_registry") || "N/A" %></li>
-  <li><strong>JARM Fingerprint:</strong> <%= @result.dig("attributes", "last_https_certificate", "extensions", "jarm") || "N/A" %></li>
-</ul>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+  <!-- Left Column -->
+  <div class="space-y-4">
+    <div>
+      <p class="text-gray-400">URL</p>
+      <p class="text-white break-all"><%= @result.dig("attributes", "url") %></p>
+    </div>
 
-<hr class="my-6 border-[#394568]" />
+    <div>
+      <p class="text-gray-400">Status</p>
+      <p class="text-white"><%= @result.dig("attributes", "status") || "N/A" %></p>
+    </div>
 
-<h2 class="text-xl font-semibold mb-4">Last HTTPS Certificate</h2>
-<% cert = @result.dig("attributes", "last_https_certificate") || {} %>
-<ul class="space-y-2 text-sm">
-  <li><strong>Version:</strong> <%= cert["version"] || "N/A" %></li>
-  <li><strong>Serial Number:</strong> <%= cert["serial_number"] || "N/A" %></li>
-  <li><strong>Thumbprint:</strong> <%= cert["thumbprint"] || "N/A" %></li>
-  <li><strong>Signature Algorithm:</strong> <%= cert["signature_algorithm"] || "N/A" %></li>
-  <li><strong>Issuer:</strong> <%= cert["issuer"] || "N/A" %></li>
-  <li><strong>Validity:</strong>
-    <ul class="ml-4">
-      <li>Not Before: <%= cert.dig("validity", "not_before") || "N/A" %></li>
-      <li>Not After: <%= cert.dig("validity", "not_after") || "N/A" %></li>
-    </ul>
-  </li>
-  <li><strong>Subject:</strong> <%= cert["subject"] || "N/A" %></li>
-  <li><strong>Public Key Algorithm:</strong> <%= cert.dig("public_key", "algorithm") || "N/A" %></li>
-  <li><strong>Public Key Bits:</strong> <%= cert.dig("public_key", "bits") || "N/A" %></li>
-</ul>
+    <div>
+      <p class="text-gray-400">Content Type</p>
+      <p class="text-white"><%= @result.dig("attributes", "last_http_response_content_type") || "N/A" %></p>
+    </div>
 
-<hr class="my-6 border-[#394568]" />
+    <div>
+      <p class="text-gray-400">Last Analysis</p>
+      <p class="text-white">
+        <%= Time.at(@result.dig("attributes", "last_analysis_date")).strftime("%b %d, %Y %H:%M") rescue "N/A" %>
+      </p>
+    </div>
+  </div>
 
-<h2 class="text-xl font-semibold mb-4">Registration Data (RDAP)</h2>
-<ul class="space-y-2 text-sm">
-  <li><strong>Network:</strong> <%= @result.dig("attributes", "network") || "N/A" %></li>
-  <li><strong>Registry:</strong> <%= @result.dig("attributes", "regional_internet_registry") || "N/A" %></li>
-  <li><strong>ASN:</strong> <%= @result.dig("attributes", "asn") || "N/A" %></li>
-  <li><strong>AS Owner:</strong> <%= @result.dig("attributes", "as_owner") || "N/A" %></li>
-  <li><strong>Country:</strong> <%= @result.dig("attributes", "country") || "N/A" %></li>
-  <li><strong>Continent:</strong> <%= @result.dig("attributes", "continent") || "N/A" %></li>
-</ul>
+  <!-- Right Column -->
+  <div class="space-y-4">
+    <div>
+      <p class="text-gray-400">Categories</p>
+      <div class="flex flex-wrap gap-2 mt-1">
+        <% @result.dig("attributes", "categories")&.each do |engine, category| %>
+          <span class="px-2 py-1 bg-[#394568] rounded text-xs text-white"><%= category %></span>
+        <% end %>
+      </div>
+    </div>
 
-<hr class="my-6 border-[#394568]" />
+    <div>
+      <p class="text-gray-400">HTTP Response</p>
+      <p class="text-white"><%= @result.dig("attributes", "last_http_response_code") || "N/A" %></p>
+    </div>
 
-<h2 class="text-xl font-semibold mb-4">Whois Lookup</h2>
-<% whois_text = @result.dig("attributes", "whois") %>
-<% if whois_text.present? %>
-  <pre class="whitespace-pre-wrap text-gray-300 bg-[#2a2a3c] p-4 rounded-md text-sm"><%= whois_text %></pre>
-<% else %>
-  <p class="text-gray-400">No WHOIS data available for this IP.</p>
-<% end %>
-
+    <div>
+      <p class="text-gray-400">HTML Meta</p>
+      <div class="bg-[#2a2938] p-3 rounded max-h-40 overflow-y-auto">
+        <pre class="text-xs text-gray-300"><%= JSON.pretty_generate(@result.dig("attributes", "meta") || {}) %></pre>
+      </div>
+    </div>
+  </div>
+</div>
