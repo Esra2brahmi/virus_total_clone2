@@ -14,7 +14,7 @@ class IpAddressesController < ApplicationController
     @referrer_files = service.get_all_ip_relationship(ip, "referrer_files")
     @whois_records = service.get_all_ip_relationship(ip, "historical_whois")
     @ssl_certs = service.get_all_ip_relationship(ip, "historical_ssl_certificates")
-    @graph = service.get_all_ip_relationship(ip, "graphs")&.first
+    
 
 
 
@@ -49,7 +49,7 @@ end
     @referrer_files = service.get_all_ip_relationship(ip, "referrer_files")
     @whois_records = service.get_all_ip_relationship(ip, "historical_whois")
     @ssl_certs = service.get_all_ip_relationship(ip, "historical_ssl_certificates")
-    @graph = service.get_all_ip_relationship(ip, "graphs")&.first
+    
 
 
 
@@ -77,7 +77,7 @@ end
   @resolutions = service.get_all_ip_relationship(ip, "resolutions")
   @whois_records = service.get_all_ip_relationship(ip, "historical_whois")
   @ssl_certs = service.get_all_ip_relationship(ip, "historical_ssl_certificates")
-  @graph = service.get_all_ip_relationship(ip, "graphs")&.first
+  
 
 
 
