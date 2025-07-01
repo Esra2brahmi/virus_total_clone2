@@ -1,0 +1,105 @@
+<!-- views/domains/details.html.erb -->
+
+<h2 class="text-2xl font-bold text-white mb-6 border-b border-[#394568] pb-2">Domain Details</h2>
+
+<!-- === Basic Info === -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-white bg-[#1e1d2e] p-6 rounded-lg shadow mb-6">
+  <div>
+    <p><strong>Registrar:</strong> <%= @result.dig("attributes", "registrar") || "N/A" %></p>
+    <p><strong>Creation Date:</strong> <%= Time.at(@result.dig("attributes", "creation_date")) rescue "N/A" %></p>
+    <p><strong>Reputation:</strong> <%= @result.dig("attributes", "reputation") || "N/A" %></p>
+    <p><strong>JARM:</strong> <%= @result.dig("attributes", "jarm") || "N/A" %></p>
+    <p><strong>Tags:</strong> <%= (@result.dig("attributes", "tags") || []).join(", ") %></p>
+  </div>
+
+  <div>
+    <p><strong>Categories:</strong></p>
+    <ul class="ml-4 list-disc">
+      <% (@result.dig("attributes", "categories") || {}).each do |service, category| %>
+        <li><%= service %>: <%= category %></li>
+      <% end %>
+    </ul>
+  </div>
+</div>
+
+<!-- === Popularity Ranks === -->
+<% if @result.dig("attributes", "popularity_ranks") %>
+  <div class="bg-[#1e1d2e] p-6 rounded-lg shadow mb-6">
+    <h3 class="text-lg font-semibold text-white mb-4">📈 Popularity Ranks</h3>
+    <table class="w-full text-sm text-white table-auto border-collapse">
+      <thead>
+        <tr class="border-b border-[#394568] text-gray-400">
+          <th class="text-left py-2">Source</th>
+          <th class="text-left py-2">Rank</th>
+          <th class="text-left py-2">Timestamp</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @result["attributes"]["popularity_ranks"].each do |source, info| %>
+          <tr class="border-b border-[#2e2e3e]">
+            <td class="py-2"><%= source %></td>
+            <td class="py-2"><%= info["rank"] %></td>
+            <td class="py-2"><%= Time.at(info["timestamp"]) rescue "N/A" %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
+
+<!-- === DNS Records === -->
+<% if @result.dig("attributes", "last_dns_records") %>
+  <div class="bg-[#1e1d2e] p-6 rounded-lg shadow mb-6">
+    <h3 class="text-lg font-semibold text-white mb-4">🌐 Last DNS Records</h3>
+    <table class="w-full text-sm text-white table-auto border-collapse">
+      <thead>
+        <tr class="border-b border-[#394568] text-gray-400">
+          <th class="text-left py-2">Type</th>
+          <th class="text-left py-2">TTL</th>
+          <th class="text-left py-2">Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @result["attributes"]["last_dns_records"].each do |record| %>
+          <tr class="border-b border-[#2e2e3e]">
+            <td class="py-2"><%= record["type"] %></td>
+            <td class="py-2"><%= record["ttl"] %></td>
+            <td class="py-2"><%= record["value"] %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
+
+<!-- === HTTPS Certificate === -->
+<% cert = @result.dig("attributes", "last_https_certificate") %>
+<% if cert.present? %>
+  <div class="bg-[#1e1d2e] p-6 rounded-lg shadow mb-6">
+    <h3 class="text-lg font-semibold text-white mb-4">🔐 Last HTTPS Certificate</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-white">
+      <div>
+        <p><strong>Issuer:</strong> <%= cert.dig("issuer", "CN") || "N/A" %></p>
+        <p><strong>Subject:</strong> <%= cert.dig("subject", "CN") || "N/A" %></p>
+        <p><strong>Valid From:</strong> <%= Time.at(cert.dig("validity", "not_before")) rescue "N/A" %></p>
+        <p><strong>Valid Until:</strong> <%= Time.at(cert.dig("validity", "not_after")) rescue "N/A" %></p>
+        <p><strong>Thumbprint:</strong> <%= cert["thumbprint"] %></p>
+      </div>
+
+      <div>
+        <p><strong>Public Key Algorithm:</strong> <%= cert.dig("public_key", "algorithm") || "N/A" %></p>
+        <p><strong>Serial Number:</strong> <%= cert["serial_number"] %></p>
+        <p><strong>Signature Algorithm:</strong> <%= cert["signature_algorithm"] %></p>
+        <p><strong>Version:</strong> <%= cert["version"] %></p>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<!-- === Whois Info (Raw Text) === -->
+<% if @result.dig("attributes", "whois") %>
+  <div class="bg-[#1e1d2e] p-6 rounded-lg shadow mb-6">
+    <h3 class="text-lg font-semibold text-white mb-4">🧾 Whois Lookup</h3>
+    <pre class="text-white text-sm whitespace-pre-wrap"><%= @result.dig("attributes", "whois") %></pre>
+  </div>
+<% end %>

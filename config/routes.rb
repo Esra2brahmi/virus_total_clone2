@@ -10,4 +10,7 @@ Rails.application.routes.draw do
   get "ip_addresses/:id/relations", to: "ip_addresses#relations", as: :ip_relations
   get 'ip_addresses/show', to: 'ip_addresses#show', as: :show_ip_address
 
+  # Domain routes
+  post 'domains/scan', to: 'domains#scan', as: 'domain_scan'
+
 end
