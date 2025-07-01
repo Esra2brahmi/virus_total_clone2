@@ -8,7 +8,6 @@
   </div>
 </div>
 
-
 <!-- Header -->
 <div class="text-center mt-8">
   <%= image_tag "logoipsum-381.png", alt: "Logo", class: "mx-auto w-20 h-20 mb-2" %>
@@ -19,14 +18,14 @@
 <!-- Tabs Section -->
 <div class="max-w-4xl mx-auto mt-10">
   <div class="flex justify-around border-b border-gray-600">
-    <button class="tab-button px-4 py-2 text-[#87aaf8] border-b-2 border-[#87aaf8]">File Scan</button>
-    <button class="tab-button px-4 py-2 text-gray-400 hover:text-[#87aaf8]">URL Scan</button>
-    <button class="tab-button px-4 py-2 text-gray-400 hover:text-[#87aaf8]">General Search</button>
+    <button class="tab-button px-4 py-2 text-gray-400 hover:text-[#87aaf8]" data-tab="file">File Scan</button>
+    <button class="tab-button px-4 py-2 text-gray-400 hover:text-[#87aaf8]" data-tab="url">URL Scan</button>
+    <button class="tab-button px-4 py-2 text-[#87aaf8] border-b-2 border-[#87aaf8]" data-tab="search">General Search</button>
   </div>
 
   <div class="tab-content mt-6">
     <!-- File Tab -->
-    <div class="tab-pane">
+    <div class="tab-pane hidden" id="file-tab">
       <div class="text-center p-6 border border-gray-700 rounded-lg">
         <%= image_tag "file-up.svg", class: "w-16 h-16 mx-auto mb-4" %>
         <p class="mb-2">Upload a file to scan</p>
@@ -34,52 +33,69 @@
       </div>
     </div>
 
-    <!-- URL Tab (Hidden by default) -->
-    <div class="tab-pane hidden">
+    <!-- URL Tab -->
+    <div class="tab-pane hidden" id="url-tab">
       <div class="text-center p-6 border border-gray-700 rounded-lg">
         <%= image_tag "search-code.svg", class: "w-16 h-16 mx-auto mb-4" %>
         <p class="mb-2">Enter a URL to scan</p>
-        <input type="text" placeholder="https://example.com" class="w-3/4 p-2 rounded text-white bg-[#394568] focus:outline-none" />
-      </div>
-    </div>
-
-    <!-- General Search Tab (Hidden by default) -->
-    <div class="tab-pane hidden">
-      <div class="text-center p-6 border border-gray-700 rounded-lg">
-        <%= image_tag "globe.svg", class: "w-16 h-16 mx-auto mb-4" %>
-        <p class="mb-2">Search a hash, domain, IP, URL...</p>
-    
-        <%= form_with url: ip_scan_path, method: :post, local: true do |f| %>
-          <%= f.text_field :query, placeholder: "e.g. 8.8.8.8", class: "w-3/4 p-2 rounded text-white bg-[#394568] focus:outline-none" %>
-          <%= f.submit "Search", class: "mt-4 px-4 py-2 bg-[#87aaf8] text-black font-bold rounded hover:bg-blue-400 transition" %>
+        <%= form_with url: url_scan_path, method: :post, local: true do |f| %>
+          <%= f.text_field :query, 
+                placeholder: "https://example.com", 
+                class: "w-3/4 p-2 rounded text-white bg-[#394568] focus:outline-none" %>
+          <%= f.submit "Scan", 
+                class: "mt-4 px-4 py-2 bg-[#87aaf8] text-black font-bold rounded hover:bg-blue-400 transition" %>
         <% end %>
       </div>
     </div>
-    
+
+    <!-- General Search Tab -->
+    <div class="tab-pane" id="search-tab">
+      <div class="text-center p-6 border border-gray-700 rounded-lg">
+        <%= image_tag "globe.svg", class: "w-16 h-16 mx-auto mb-4" %>
+        <p class="mb-2">Search a hash, domain, IP, URL...</p>
+        <%= form_with url: ip_scan_path, method: :post, local: true do |f| %>
+          <%= f.text_field :query, 
+                placeholder: "e.g. 8.8.8.8", 
+                class: "w-3/4 p-2 rounded text-white bg-[#394568] focus:outline-none" %>
+          <%= f.submit "Search", 
+                class: "mt-4 px-4 py-2 bg-[#87aaf8] text-black font-bold rounded hover:bg-blue-400 transition" %>
+        <% end %>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
-const tabs = document.querySelectorAll('.tab-button');
-const panes = document.querySelectorAll('.tab-pane');
+document.addEventListener('DOMContentLoaded', function() {
+  const tabs = document.querySelectorAll('.tab-button');
+  const panes = document.querySelectorAll('.tab-pane');
 
-tabs.forEach((tab, index) => {
-  tab.addEventListener('click', () => {
+  // Function to activate a tab
+  function activateTab(tab) {
+    // Remove active classes from all tabs
     tabs.forEach(t => {
       t.classList.remove('text-[#87aaf8]', 'border-[#87aaf8]', 'border-b-2');
-      t.classList.add('text-gray-400'); // Make inactive tabs gray
+      t.classList.add('text-gray-400');
     });
+    
+    // Hide all panes
     panes.forEach(p => p.classList.add('hidden'));
-
+    
+    // Activate clicked tab
     tab.classList.add('text-[#87aaf8]', 'border-[#87aaf8]', 'border-b-2');
     tab.classList.remove('text-gray-400');
-    panes[index].classList.remove('hidden');
+    
+    // Show corresponding pane
+    const tabName = tab.getAttribute('data-tab');
+    document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+  }
+
+  // Add click event to tabs
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => activateTab(tab));
   });
+
+  // Initialize with General Search tab active
+  activateTab(document.querySelector('[data-tab="search"]'));
 });
-
-// Initialize first tab active
-tabs[0].classList.add('text-[#87aaf8]', 'border-[#87aaf8]', 'border-b-2');
-tabs[0].classList.remove('text-gray-400');
-panes[0].classList.remove('hidden');
-
 </script>
