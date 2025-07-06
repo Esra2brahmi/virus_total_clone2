@@ -1,0 +1,47 @@
+<h2 class="text-xl font-semibold mb-4 text-white border-b border-[#394568] pb-2">Communicating Files</h2>
+
+<div id="communicating-files-content">
+  <div class="text-center py-8">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#87aaf8] mx-auto"></div>
+    <p class="text-gray-400 mt-2">Loading communicating files...</p>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Load communicating files when relations tab is clicked
+  const relationsTab = document.querySelector('[data-tab="relations"]');
+  if (relationsTab) {
+    relationsTab.addEventListener('click', function() {
+      loadCommunicatingFiles();
+    });
+  }
+});
+
+function loadCommunicatingFiles(page = 1) {
+  const contentDiv = document.getElementById('communicating-files-content');
+  const domain = '<%= params[:query] %>';
+  
+  // Show loading spinner
+  contentDiv.innerHTML = `
+    <div class="text-center py-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#87aaf8] mx-auto"></div>
+      <p class="text-gray-400 mt-2">Loading communicating files...</p>
+    </div>
+  `;
+  
+  fetch(`/domains/communicating_files?query=${encodeURIComponent(domain)}&page=${page}`)
+    .then(response => response.text())
+    .then(html => {
+      contentDiv.innerHTML = html;
+    })
+    .catch(error => {
+      contentDiv.innerHTML = '<p class="text-red-400 text-center">Error loading communicating files.</p>';
+      console.error('Error:', error);
+    });
+}
+
+function loadCommunicatingFilesPage(page) {
+  loadCommunicatingFiles(page);
+}
+</script>

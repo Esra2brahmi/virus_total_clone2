@@ -1,0 +1,55 @@
+<% if @files.present? %>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm text-left text-gray-300">
+      <thead class="bg-[#2a2b3c] text-gray-400 uppercase text-xs tracking-wider">
+        <tr>
+          <th class="px-4 py-3">📅 Scanned</th>
+          <th class="px-4 py-3">🛡️ Detections</th>
+          <th class="px-4 py-3">📂 Type</th>
+          <th class="px-4 py-3">📄 Name</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[#394568]" id="files-tbody">
+        <% @files.each do |file| %>
+          <% attr = file["attributes"] %>
+          <% total = attr["last_analysis_stats"]&.values&.sum || 1 %>
+          <% malicious = attr["last_analysis_stats"]["malicious"] || 0 %>
+          <% filename = attr["meaningful_name"] || "N/A" %>
+          <% file_link = "https://www.virustotal.com/gui/file/#{file['id']}" %>
+
+          <tr class="hover:bg-[#2f3147] transition">
+            <td class="px-4 py-3">
+              <%= Time.at(attr["last_analysis_date"]).strftime("%Y-%m-%d") rescue "N/A" %>
+            </td>
+            <td class="px-4 py-3 font-semibold <%= malicious > 0 ? 'text-red-400' : 'text-green-400' %>">
+              <%= "#{malicious} / #{total}" %>
+            </td>
+            <td class="px-4 py-3">
+              <%= attr["type_description"] || "Unknown" %>
+            </td>
+            <td class="px-4 py-3">
+              <a href="<%= file_link %>" class="text-blue-400 hover:underline" target="_blank" rel="noopener">
+                <%= filename %>
+              </a>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Load More Row -->
+  <% if @has_next %>
+    <div class="mt-4 text-center">
+      <button onclick="loadPage(<%= @page + 1 %>)" class="px-4 py-2 bg-[#394568] text-white rounded-full hover:bg-[#4a5a7a] transition flex items-center justify-center mx-auto">
+        <div class="flex gap-1">
+          <div class="w-1 h-1 bg-white rounded-full animate-pulse"></div>
+          <div class="w-1 h-1 bg-white rounded-full animate-pulse" style="animation-delay: 0.1s"></div>
+          <div class="w-1 h-1 bg-white rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+        </div>
+      </button>
+    </div>
+  <% end %>
+<% else %>
+  <p class="text-gray-400 italic">No communicating files found for this domain.</p>
+<% end %> 
