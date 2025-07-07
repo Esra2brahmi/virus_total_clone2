@@ -1,0 +1,73 @@
+<h2 class="text-xl font-bold text-[#87aaf8] mb-2">Undetected URLs</h2>
+<% if undetected_urls.present? %>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm text-left text-gray-300">
+      <thead class="bg-[#2a2b3c] text-gray-400 uppercase text-xs tracking-wider">
+        <tr>
+          <th class="px-4 py-3">URL</th>
+          <th class="px-4 py-3">Scan Date</th>
+          <th class="px-4 py-3">Detections</th>
+          <th class="px-4 py-3">SHA256</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[#394568]">
+        <% undetected_urls.each do |url| %>
+          <% if url.is_a?(Array) %>
+            <tr>
+              <td class="px-4 py-3 max-w-xs truncate" title="<%= url[0] %>">
+                <a href="<%= url[0] %>" class="text-blue-400 hover:underline" target="_blank">
+                  <%= url[0].length > 50 ? url[0].first(30) + '...' + url[0].last(15) : url[0] %>
+                </a>
+              </td>
+              <td class="px-4 py-3"><%= url[4] %></td>
+              <td class="px-4 py-3 font-semibold">
+                <span class="<%= url[2].to_i > 0 ? 'text-red-400' : 'text-green-400' %>">
+                  <%= url[2] %> / <%= url[3] %>
+                </span>
+              </td>
+              <td class="px-4 py-3"><%= url[1] %></td>
+            </tr>
+          <% elsif url.is_a?(Hash) %>
+            <tr>
+              <td class="px-4 py-3 max-w-xs truncate" title="<%= url["url"] %>">
+                <a href="<%= url["url"] %>" class="text-blue-400 hover:underline" target="_blank">
+                  <%= url["url"].length > 50 ? url["url"].first(30) + '...' + url["url"].last(15) : url["url"] %>
+                </a>
+              </td>
+              <td class="px-4 py-3"><%= url["scan_date"] %></td>
+              <td class="px-4 py-3 font-semibold">
+                <span class="<%= url["positives"].to_i > 0 ? 'text-red-400' : 'text-green-400' %>">
+                  <%= url["positives"] %> / <%= url["total"] %>
+                </span>
+              </td>
+              <td class="px-4 py-3"><%= url["sha256"] %></td>
+            </tr>
+          <% else %>
+            <tr>
+              <td class="px-4 py-3 max-w-xs truncate" title="<%= url %>">
+                <a href="<%= url %>" class="text-blue-400 hover:underline" target="_blank">
+                  <%= url.length > 50 ? url.first(30) + '...' + url.last(15) : url %>
+                </a>
+              </td>
+              <td class="px-4 py-3">N/A</td>
+              <td class="px-4 py-3">N/A</td>
+              <td class="px-4 py-3">N/A</td>
+            </tr>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <!-- AJAX Pagination Controls -->
+  <div class="mt-4 flex justify-center gap-2 text-sm">
+    <% if undetected_urls_page > 1 %>
+      <%= link_to "⬅ Prev", url_for(params.permit!.merge(undetected_urls_page: undetected_urls_page)), class: "px-3 py-1 bg-[#394568] text-white rounded undetected-urls-page-link", data: { page: undetected_urls_page - 1 }, remote: true %>
+    <% end %>
+    <span class="px-3 py-1 bg-[#23253b] text-gray-300 rounded">Page <%= undetected_urls_page %> of <%= undetected_urls_total_pages %></span>
+    <% if undetected_urls_page < undetected_urls_total_pages %>
+      <%= link_to "Next ➡", url_for(params.permit!.merge(undetected_urls_page: undetected_urls_page)), class: "px-3 py-1 bg-[#394568] text-white rounded undetected-urls-page-link", data: { page: undetected_urls_page + 1 }, remote: true %>
+    <% end %>
+  </div>
+<% else %>
+  <p class="text-gray-400">No undetected URLs found.</p>
+<% end %> 

@@ -8,148 +8,227 @@
   </div>
 </div>
 
-<!-- Main Analysis Section -->
-<div class="max-w-5xl mx-auto mt-10 grid grid-cols-1 md:grid-cols-3 gap-4">
- <% malicious = @result.dig("attributes", "last_analysis_stats", "malicious") || 0 %>
-<% total = @result.dig("attributes", "last_analysis_stats")&.values&.sum || 1 %>
-
-<% if malicious == 0 %>
-  <% percent = 100 %>
-  <% ring_color = "#22c55e" %>
-<% else %>
-  <% percent = [(malicious.to_f / total) * 100, 100].min.round %>
-  <% ring_color = "#ef4444" %>
-<% end %>
-
-<div class="bg-[#1e1d2e] p-6 rounded-lg shadow text-center">
-  <div class="relative w-24 h-24 mx-auto">
-    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-      <!-- Background circle -->
-      <circle
-        cx="18"
-        cy="18"
-        r="16"
-        fill="none"
-        stroke="#394568"
-        stroke-width="4"
-      />
-
-      <!-- Progress arc -->
-      <circle
-        cx="18"
-        cy="18"
-        r="16"
-        fill="none"
-        stroke="<%= ring_color %>"
-        stroke-width="4"
-        stroke-dasharray="100"
-        stroke-dashoffset="<%= 100 - percent %>"
-        stroke-linecap="round"
-        style="transition: stroke-dashoffset 1s ease"
-      />
-    </svg>
-
-    <!-- Score Text in center -->
-    <div class="absolute inset-0 flex flex-col items-center justify-center text-white">
-      <p class="text-xl font-bold"><%= malicious %></p>
-      <p class="text-xs text-gray-400">/ <%= total %></p>
-    </div>
-  </div>
-
-  <p class="text-gray-400 mt-2">Detection Score</p>
+<!-- Domain Overview -->
+<div class="max-w-5xl mx-auto mt-10 bg-[#1e1d2e] p-6 rounded-lg shadow text-white text-sm">
+  <h2 class="text-2xl font-bold text-[#87aaf8] mb-4">Domain: <%= @domain.domain %></h2>
+  <p><strong>Categories:</strong> <%= @domain.categories&.join(", ") || "N/A" %></p>
+  <p><strong>WHOIS Timestamp:</strong> <%= @domain.whois_timestamp ? Time.at(@domain.whois_timestamp) : "N/A" %></p>
+  <p><strong>Verbose Message:</strong> <%= @domain.verbose_msg %></p>
 </div>
 
-  <!-- Alert Box -->
-  <div class="md:col-span-2 bg-[#1e1d2e] p-6 rounded-lg shadow md:flex md:justify-between md:items-start">
-    <!-- Main Alert Info -->
-    <div class="md:w-2/3 flex flex-col space-y-2">
-      <% malicious_count = @result.dig("attributes", "last_analysis_stats", "malicious") %>
-      <% total_engines = @result.dig("attributes", "last_analysis_stats")&.values&.sum || 0 %>
-  
-      <div class="flex items-center space-x-4">
-      <% if malicious_count > 0 %>
-        <p class="flex items-center gap-3 text-red-700 text-sm font-medium">
-          <span class="flex items-center justify-center w-7 h-7 rounded-full border-2 border-red-500">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </span>
-          <span><%= malicious_count %> / <%= total_engines %> security vendors flagged this as malicious</span>
-        </p>
-      <% else %>
-        <p class="flex items-center gap-3 text-green-500 text-sm font-medium">
-          <span class="flex items-center justify-center w-7 h-7 rounded-full border-2 border-green-500">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </span>
-          <span>No security vendors flagged this as malicious</span>
-        </p>
+<!-- Subdomains -->
+<div class="max-w-5xl mx-auto mt-8">
+  <h2 class="text-xl font-bold text-[#87aaf8] mb-2">Subdomains</h2>
+  <% if @domain.subdomains.present? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-white">
+      <% @domain.subdomains.each do |sub| %>
+        <div class="bg-[#23253b] rounded px-4 py-2 break-all"><%= sub %></div>
       <% end %>
-      </div>
-  
-      <p class="text-white text-sm"><strong>Domain:</strong> <%= @result["id"] %></p>
-      <p class="text-gray-400 text-sm mt-1"><strong>Registrar:</strong> <%= @result.dig("attributes", "registrar") || "N/A" %></p>
     </div>
-  
-    <!-- Vertical Line -->
-    <div class="hidden md:block w-px bg-[#394568] mx-6 h-full"></div>
-  
-    <!-- Extra Info: Date & Reputation -->
-    <div class="md:w-1/3 mt-6 md:mt-0 space-y-2">
-      <p class="text-gray-400 text-sm">
-        <strong>Last Analysis:</strong>
-        <%= Time.at(@result.dig("attributes", "last_analysis_date")) rescue "N/A" %>
-      </p>
-  
-      <p class="text-gray-400 text-sm">
-        <strong>Reputation:</strong>
-        <%= @result.dig("attributes", "reputation") || "N/A" %>
-      </p>
-    </div> 
-  </div>
-</div>
+  <% else %>
+    <p class="text-gray-400">No subdomains found.</p>
+  <% end %>
 </div>
 
-<!-- Info Table -->
-<div class="max-w-5xl mx-auto mt-6 bg-[#1e1d2e] p-6 rounded-lg shadow text-white text-sm">
-  <p><strong>Creation Date:</strong> <%= Time.at(@result.dig("attributes", "creation_date")) rescue "N/A" %></p>
-  <p><strong>Last Update:</strong> <%= Time.at(@result.dig("attributes", "last_update_date")) rescue "N/A" %></p>
-  <p><strong>Categories:</strong> <%= @result.dig("attributes", "categories")&.values&.join(", ") || "N/A" %></p>
-  <p><strong>Tags:</strong> <%= @result.dig("attributes", "tags")&.join(", ") || "N/A" %></p>
+<!-- Resolutions -->
+<div class="max-w-5xl mx-auto mt-8">
+  <h2 class="text-xl font-bold text-[#87aaf8] mb-2">Resolutions</h2>
+  <% if @domain.resolutions.present? %>
+    <table class="w-full text-sm text-left text-gray-300">
+      <thead class="bg-[#2a2b3c] text-gray-400 uppercase text-xs tracking-wider">
+        <tr>
+          <th class="px-4 py-3">IP Address</th>
+          <th class="px-4 py-3">Last Resolved</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[#394568]">
+        <% @domain.resolutions.each do |res| %>
+          <tr>
+            <td class="px-4 py-3"><%= res["ip_address"] %></td>
+            <td class="px-4 py-3"><%= res["last_resolved"] %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p class="text-gray-400">No resolutions found.</p>
+  <% end %>
 </div>
 
-<!-- Tabs Navigation -->
-<div class="max-w-5xl mx-auto mt-10">
-  <div class="flex border-b border-[#394568] text-white">
-    <button class="tab-button px-4 py-2 focus:outline-none active-tab" data-tab="detection">Detection</button>
-    <button class="tab-button px-4 py-2 focus:outline-none" data-tab="details">Details</button>
-    <button class="tab-button px-4 py-2 focus:outline-none" data-tab="relations">Relations</button>
-    <button class="tab-button px-4 py-2 focus:outline-none" data-tab="community">Community</button>
-  </div>
-
-  <!-- Tab Content Wrapper -->
-  <div class="bg-[#1e1d2e] p-6 rounded-b-lg shadow text-white">
-    <!-- Detection Tab -->
-    <div class="tab-content" id="detection">
-      <%= render 'ip_addresses/detection', result: @result %>
+<!-- Detected URLs -->
+<div class="max-w-5xl mx-auto mt-8">
+  <h2 class="text-xl font-bold text-[#87aaf8] mb-2">Detected URLs</h2>
+  <% if @detected_urls.present? %>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left text-gray-300">
+        <thead class="bg-[#2a2b3c] text-gray-400 uppercase text-xs tracking-wider">
+          <tr>
+            <th class="px-4 py-3">URL</th>
+            <th class="px-4 py-3">Scan Date</th>
+            <th class="px-4 py-3">Detections</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#394568]">
+          <% @detected_urls.each do |url| %>
+            <tr>
+              <td class="px-4 py-3 max-w-xs truncate" title="<%= url["url"] %>">
+                <a href="<%= url["url"] %>" class="text-blue-400 hover:underline" target="_blank">
+                  <%= url["url"].length > 50 ? url["url"].first(30) + '...' + url["url"].last(15) : url["url"] %>
+                </a>
+              </td>
+              <td class="px-4 py-3"><%= url["scan_date"] %></td>
+              <td class="px-4 py-3 font-semibold">
+                <span class="<%= url["positives"].to_i > 0 ? 'text-red-400' : 'text-green-400' %>">
+                  <%= url["positives"] %> / <%= url["total"] %>
+                </span>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
     </div>
-
-    <!-- Details Tab -->
-    <div class="tab-content hidden" id="details">
-      <%= render 'domains/details' %>
+    <!-- Pagination Controls -->
+    <div class="mt-4 flex justify-center gap-2 text-sm">
+      <% if @detected_urls_page > 1 %>
+        <%= link_to "⬅ Prev", url_for(params.permit!.merge(detected_urls_page: @detected_urls_page - 1)), class: "px-3 py-1 bg-[#394568] text-white rounded" %>
+      <% end %>
+      <span class="px-3 py-1 bg-[#23253b] text-gray-300 rounded">Page <%= @detected_urls_page %> of <%= @detected_urls_total_pages %></span>
+      <% if @detected_urls_page < @detected_urls_total_pages %>
+        <%= link_to "Next ➡", url_for(params.permit!.merge(detected_urls_page: @detected_urls_page + 1)), class: "px-3 py-1 bg-[#394568] text-white rounded" %>
+      <% end %>
     </div>
+  <% else %>
+    <p class="text-gray-400">No detected URLs found.</p>
+  <% end %>
+</div>
 
-    <!-- Relations Tab -->
-    <div class="tab-content hidden" id="relations">
-      <%= render 'domains/relations' %>
+<!-- Undetected URLs -->
+<div class="max-w-5xl mx-auto mt-8">
+  <h2 class="text-xl font-bold text-[#87aaf8] mb-2">Undetected URLs</h2>
+  <% if @undetected_urls.present? %>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left text-gray-300">
+        <thead class="bg-[#2a2b3c] text-gray-400 uppercase text-xs tracking-wider">
+          <tr>
+            <th class="px-4 py-3">URL</th>
+            <th class="px-4 py-3">Scan Date</th>
+            <th class="px-4 py-3">Detections</th>
+            <th class="px-4 py-3">SHA256</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#394568]">
+          <% @undetected_urls.each do |url| %>
+            <% if url.is_a?(Array) %>
+              <tr>
+                <td class="px-4 py-3 max-w-xs truncate" title="<%= url[0] %>">
+                  <a href="<%= url[0] %>" class="text-blue-400 hover:underline" target="_blank">
+                    <%= url[0].length > 50 ? url[0].first(30) + '...' + url[0].last(15) : url[0] %>
+                  </a>
+                </td>
+                <td class="px-4 py-3"><%= url[4] %></td>
+                <td class="px-4 py-3 font-semibold">
+                  <span class="<%= url[2].to_i > 0 ? 'text-red-400' : 'text-green-400' %>">
+                    <%= url[2] %> / <%= url[3] %>
+                  </span>
+                </td>
+                <td class="px-4 py-3"><%= url[1] %></td>
+              </tr>
+            <% elsif url.is_a?(Hash) %>
+              <tr>
+                <td class="px-4 py-3 max-w-xs truncate" title="<%= url["url"] %>">
+                  <a href="<%= url["url"] %>" class="text-blue-400 hover:underline" target="_blank">
+                    <%= url["url"].length > 50 ? url["url"].first(30) + '...' + url["url"].last(15) : url["url"] %>
+                  </a>
+                </td>
+                <td class="px-4 py-3"><%= url["scan_date"] %></td>
+                <td class="px-4 py-3 font-semibold">
+                  <span class="<%= url["positives"].to_i > 0 ? 'text-red-400' : 'text-green-400' %>">
+                    <%= url["positives"] %> / <%= url["total"] %>
+                  </span>
+                </td>
+                <td class="px-4 py-3"><%= url["sha256"] %></td>
+              </tr>
+            <% else %>
+              <tr>
+                <td class="px-4 py-3 max-w-xs truncate" title="<%= url %>">
+                  <a href="<%= url %>" class="text-blue-400 hover:underline" target="_blank">
+                    <%= url.length > 50 ? url.first(30) + '...' + url.last(15) : url %>
+                  </a>
+                </td>
+                <td class="px-4 py-3">N/A</td>
+                <td class="px-4 py-3">N/A</td>
+                <td class="px-4 py-3">N/A</td>
+              </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
     </div>
+    <!-- Pagination Controls -->
+    <div class="mt-4 flex justify-center gap-2 text-sm">
+      <% if @undetected_urls_page > 1 %>
+        <%= link_to "⬅ Prev", url_for(params.permit!.merge(undetected_urls_page: @undetected_urls_page - 1)), class: "px-3 py-1 bg-[#394568] text-white rounded" %>
+      <% end %>
+      <span class="px-3 py-1 bg-[#23253b] text-gray-300 rounded">Page <%= @undetected_urls_page %> of <%= @undetected_urls_total_pages %></span>
+      <% if @undetected_urls_page < @undetected_urls_total_pages %>
+        <%= link_to "Next ➡", url_for(params.permit!.merge(undetected_urls_page: @undetected_urls_page + 1)), class: "px-3 py-1 bg-[#394568] text-white rounded" %>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-gray-400">No undetected URLs found.</p>
+  <% end %>
+</div>
 
-    <!-- Community Tab -->
-    <div class="tab-content hidden" id="community">
-      <%= render 'ip_addresses/community' %>
-    </div>
-  </div>
+<!-- Detected Downloaded Samples -->
+<div class="max-w-5xl mx-auto mt-8">
+  <h2 class="text-xl font-bold text-[#87aaf8] mb-2">Detected Downloaded Samples</h2>
+  <% if @domain.detected_downloaded_samples.present? %>
+    <table class="w-full text-sm text-left text-gray-300">
+      <thead class="bg-[#2a2b3c] text-gray-400 uppercase text-xs tracking-wider">
+        <tr>
+          <th class="px-4 py-3">SHA256</th>
+          <th class="px-4 py-3">Detections</th>
+          <th class="px-4 py-3">Date</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[#394568]">
+        <% @domain.detected_downloaded_samples.each do |sample| %>
+          <tr>
+            <td class="px-4 py-3"><%= sample["sha256"] %></td>
+            <td class="px-4 py-3 font-semibold <%= sample["positives"].to_i > 0 ? 'text-red-400' : 'text-green-400' %>"><%= sample["positives"] %> / <%= sample["total"] %></td>
+            <td class="px-4 py-3"><%= sample["date"] %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p class="text-gray-400">No detected downloaded samples found.</p>
+  <% end %>
+</div>
+
+<!-- Undetected Downloaded Samples -->
+<div class="max-w-5xl mx-auto mt-8">
+  <h2 class="text-xl font-bold text-[#87aaf8] mb-2">Undetected Downloaded Samples</h2>
+  <% if @domain.undetected_downloaded_samples.present? %>
+    <table class="w-full text-sm text-left text-gray-300">
+      <thead class="bg-[#2a2b3c] text-gray-400 uppercase text-xs tracking-wider">
+        <tr>
+          <th class="px-4 py-3">SHA256</th>
+          <th class="px-4 py-3">Date</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[#394568]">
+        <% @domain.undetected_downloaded_samples.each do |sample| %>
+          <tr>
+            <td class="px-4 py-3"><%= sample["sha256"] %></td>
+            <td class="px-4 py-3"><%= sample["date"] %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p class="text-gray-400">No undetected downloaded samples found.</p>
+  <% end %>
 </div>
 
 <script>

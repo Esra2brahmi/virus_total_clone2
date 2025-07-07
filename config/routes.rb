@@ -12,8 +12,10 @@ Rails.application.routes.draw do
 
   # Domain routes
   post 'domains/scan', to: 'domains#scan', as: 'domain_scan'
+  get 'domains/scan', to: 'domains#scan'
   get 'domains/communicating_files', to: 'domains#communicating_files', as: 'communicating_files'
   get 'domains/debug_api', to: 'domains#debug_api', as: 'debug_api'
+  get 'domains/subdomains', to: 'domains#subdomains', as: 'subdomains'
   
 
 

@@ -1,0 +1,47 @@
+<% if @subdomains.present? %>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm text-left text-gray-300">
+      <thead class="bg-[#2a2b3c] text-gray-400 uppercase text-xs tracking-wider">
+        <tr>
+          <th class="px-4 py-3">Subdomain</th>
+          <th class="px-4 py-3">Detection</th>
+          <th class="px-4 py-3">Last Known IP</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[#394568]" id="subdomains-tbody">
+        <% @subdomains.each do |sub| %>
+          <% attr = sub["attributes"] %>
+          <% id = sub["id"] %>
+          <% total = attr["last_analysis_stats"]&.values&.sum || 1 %>
+          <% malicious = attr["last_analysis_stats"]&.fetch("malicious", 0) || 0 %>
+          <% last_ip = attr["last_dns_records"]&.find { |r| r["type"] == "A" }&.dig("value") || "-" %>
+          <tr class="hover:bg-[#2f3147] transition">
+            <td class="px-4 py-3">
+              <a href="https://www.virustotal.com/gui/domain/<%= id %>" class="text-blue-400 hover:underline" target="_blank" rel="noopener">
+                <%= id %>
+              </a>
+            </td>
+            <td class="px-4 py-3 font-semibold <%= malicious > 0 ? 'text-red-400' : 'text-green-400' %>">
+              <%= "#{malicious} / #{total}" %>
+            </td>
+            <td class="px-4 py-3"><%= last_ip %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if @has_next %>
+    <div class="mt-4 text-center">
+      <button onclick="loadSubdomainsPage(<%= @page + 1 %>)" class="px-4 py-2 bg-[#394568] text-white rounded-full hover:bg-[#4a5a7a] transition flex items-center justify-center mx-auto">
+        <div class="flex gap-1">
+          <div class="w-1 h-1 bg-white rounded-full animate-pulse"></div>
+          <div class="w-1 h-1 bg-white rounded-full animate-pulse" style="animation-delay: 0.1s"></div>
+          <div class="w-1 h-1 bg-white rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+        </div>
+      </button>
+    </div>
+  <% end %>
+<% else %>
+  <p class="text-gray-400 italic">No subdomains found for this domain.</p>
+<% end %> 
