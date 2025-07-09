@@ -12,6 +12,8 @@ gem "virustotalx"  # or the gem you use for VirusTotal API
 gem "dotenv-rails"
 gem "heroicon"
 
+gem 'sidekiq'
+
 
 
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]

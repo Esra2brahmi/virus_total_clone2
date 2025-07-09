@@ -29,11 +29,29 @@ class DomainsController < ApplicationController
     @undetected_urls_total_pages = (undetected_urls.size / undetected_per_page.to_f).ceil
     @undetected_urls = undetected_urls.slice((@undetected_urls_page - 1) * undetected_per_page, undetected_per_page) || []
 
+    # Pagination for undetected_downloaded_samples
+    undetected_samples_per_page = 10
+    @undetected_downloaded_samples_page = (params[:undetected_downloaded_samples_page] || 1).to_i
+    undetected_samples = @domain.undetected_downloaded_samples || []
+    @undetected_downloaded_samples_total_pages = (undetected_samples.size / undetected_samples_per_page.to_f).ceil
+    @undetected_downloaded_samples = undetected_samples.slice((@undetected_downloaded_samples_page - 1) * undetected_samples_per_page, undetected_samples_per_page) || []
+
+    # Pagination for subdomains
+    subdomains_per_page = 10
+    @subdomains_page = (params[:subdomains_page] || 1).to_i
+    subdomains = @domain.subdomains || []
+    @subdomains_total_pages = (subdomains.size / subdomains_per_page.to_f).ceil
+    @subdomains = subdomains.slice((@subdomains_page - 1) * subdomains_per_page, subdomains_per_page) || []
+
     if request.xhr?
       if params[:detected_urls_page]
         render partial: 'domains/detected_urls', locals: { detected_urls: @detected_urls, detected_urls_page: @detected_urls_page, detected_urls_total_pages: @detected_urls_total_pages }
       elsif params[:undetected_urls_page]
         render partial: 'domains/undetected_urls', locals: { undetected_urls: @undetected_urls, undetected_urls_page: @undetected_urls_page, undetected_urls_total_pages: @undetected_urls_total_pages }
+      elsif params[:undetected_downloaded_samples_page]
+        render partial: 'domains/undetected_downloaded_samples', locals: { undetected_downloaded_samples: @undetected_downloaded_samples, undetected_downloaded_samples_page: @undetected_downloaded_samples_page, undetected_downloaded_samples_total_pages: @undetected_downloaded_samples_total_pages }
+      elsif params[:subdomains_page]
+        render partial: 'domains/subdomains', locals: { subdomains: @subdomains, subdomains_page: @subdomains_page, subdomains_total_pages: @subdomains_total_pages }
       else
         render 'domains/result'
       end

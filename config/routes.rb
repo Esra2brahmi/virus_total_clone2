@@ -16,7 +16,8 @@ Rails.application.routes.draw do
   get 'domains/communicating_files', to: 'domains#communicating_files', as: 'communicating_files'
   get 'domains/debug_api', to: 'domains#debug_api', as: 'debug_api'
   get 'domains/subdomains', to: 'domains#subdomains', as: 'subdomains'
-  
+  get 'reverse_ip_lookups/:ip', to: 'reverse_ip_lookups#show', as: 'reverse_ip_lookup', constraints: { ip: /[^\/]+/ }
+  get 'subdomain_statuses/:subdomain', to: 'subdomain_statuses#show', as: 'subdomain_status', constraints: { subdomain: /[^\/]+/ }
 
 
 end
