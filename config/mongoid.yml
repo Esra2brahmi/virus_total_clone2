@@ -183,10 +183,3 @@ test:
         read:
           mode: :primary
         max_pool_size: 1
-
-production:
-  clients:
-    default:
-      uri: <%= ENV['MONGODB_URI'] || ENV['MONGOLAB_URI'] %>
-      options:
-        server_selection_timeout: 5

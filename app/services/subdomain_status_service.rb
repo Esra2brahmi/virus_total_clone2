@@ -4,8 +4,7 @@ class SubdomainStatusService
   def self.check(subdomain)
     urls = ["https://#{subdomain}", "http://#{subdomain}"]
     urls.each do |url|
-      output = `echo "#{url}" | #{HTTPX_PATH} -status-code -timeout 5 2>/dev/null`
-      Rails.logger.info "HTTPX CHECK: #{url} => #{output.inspect}"  # LOG TO RAILS LOGS
+      output = `echo "#{url}" | #{HTTPX_PATH} -status-code -timeout 5 2>/dev/null` 
       # Remove ANSI color codes
       output = output.gsub(/\e\[[\d;]*m/, '')
       if output =~ /\[(\d+)\]/
