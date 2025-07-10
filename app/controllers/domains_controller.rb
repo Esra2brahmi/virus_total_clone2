@@ -15,6 +15,12 @@ class DomainsController < ApplicationController
       end
     end
 
+    # Combine all URLs (detected + undetected) for UI
+    @all_urls = []
+    @all_urls += (@domain.detected_urls || []).map { |u| u.is_a?(Hash) ? u["url"] : u }
+    @all_urls += (@domain.undetected_urls || []).map { |u| u.is_a?(Hash) ? u["url"] : u }
+    @all_urls.uniq!
+
     # Pagination for detected_urls
     per_page = 10
     @detected_urls_page = (params[:detected_urls_page] || 1).to_i
